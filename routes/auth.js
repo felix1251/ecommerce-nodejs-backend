@@ -20,7 +20,6 @@ router.post("/register", async (req, res) => {
     res.status(500).json(err);
   }
 });
-
 //LOGIN
 router.post("/login", async (req, res) => {
   try {
@@ -39,7 +38,7 @@ router.post("/login", async (req, res) => {
         isAdmin: user.isAdmin,
       },
       process.env.JWT_SEC,
-      { expiresIn: "3d" }
+      { expiresIn: "1d" }
     );
     const { password, ...others } = user._doc;
     res.status(200).json({ ...others, accessToken });

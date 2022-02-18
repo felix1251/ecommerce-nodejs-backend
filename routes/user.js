@@ -15,7 +15,6 @@ router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
       process.env.PASS_SEC
     ).toString();
   }
-
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
@@ -64,7 +63,6 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
 //GET USER STATS
 router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
   const date = new Date();
-
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
   try {
     const data = await User.aggregate([
