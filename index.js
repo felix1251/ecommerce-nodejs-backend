@@ -35,7 +35,7 @@ const server = app.listen(process.env.PORT || 5000, () => {
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "*",
+    origin: ["http://localhost:3000", "http://localhost:3001"],
   },
 });
 
@@ -51,25 +51,20 @@ const removeUser = (socketId) => {
 };
 
 const getUser = (username) => {
-  return onlineUsers.find(user=> user.username === username)
-}
+  return onlineUsers.find((user) => user.username === username);
+};
 
 io.on("connection", (socket) => {
-
   socket.on("newUser", (username) => {
-    addNewUser(username, socket.id)
-  })
+    addNewUser(username, socket.id);
+  });
 
-  socket.on("sendNotification", ({senderName, recieverName}) => {
-    const reciever = getUser(recieverName)
-    io.to(reciever?.socketId).emit("getNotification", {
-      senderName
-    });
+  socket.on("sendNotification", ({ data, recieverName }) => {
+    const reciever = getUser(recieverName);
+    io.to(reciever?.socketId).emit("getNotification", data);
   });
 
   socket.on("disconnect", () => {
-    removeUser(socket.id)
-  })
+    removeUser(socket.id);
+  });
 });
-
-
