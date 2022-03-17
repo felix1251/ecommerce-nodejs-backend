@@ -74,5 +74,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/review/:id", async (req, res) => {
+  const { rating, comment, name } = req.body;
+  const product = await Product.findById(req.params.id);
+  if (product) {
+    if (rating <= 5) {
+      const review = {
+        name: name,
+        rating: Number(rating),
+        comment: comment,
+      };
+      product.reviews.push(review);
+      await product.save();
+      res.status(201).json({ review: review, message: "Review Added" });
+    } else {
+      res.status(500).json({ message: "Max value allowed is 5" });
+    }
+  } else {
+    res.status(404).json({ message: "Product not found" });
+  }
+});
 
 module.exports = router;

@@ -39,24 +39,48 @@ const io = require("socket.io")(server, {
   },
 });
 
-let onlineUsers = [];
+let onlineAdminUsers = [];
 
 const addNewUser = (username, socketId) => {
-  !onlineUsers.some((user) => user.username === username) &&
-    onlineUsers.push({ username, socketId });
+  !onlineAdminUsers.some((user) => user.username === username) &&
+    onlineAdminUsers.push({ username, socketId });
 };
 
 const removeUser = (socketId) => {
-  onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+  onlineAdminUsers = onlineAdminUsers.filter(
+    (user) => user.socketId !== socketId
+  );
 };
 
 const getUser = (username) => {
-  return onlineUsers.find((user) => user.username === username);
+  return onlineAdminUsers.find((user) => user.username === username);
+};
+
+const getVisitorCount = (count) => {
+  var c = count - onlineAdminUsers.length;
+  if (c <= 0) {
+    return 0;
+  } else {
+    return c;
+  }
 };
 
 io.on("connection", (socket) => {
+
   socket.on("newUser", (username) => {
     addNewUser(username, socket.id);
+    const usernameList = [];
+    onlineAdminUsers.forEach((e) => usernameList.push(e.username));
+    onlineAdminUsers.forEach((e) => {
+      io.to(e.socketId).emit("online", usernameList);
+    });
+  });
+
+  onlineAdminUsers.forEach((e) => {
+    io.to(e.socketId).emit(
+      "shopVisitors",
+      getVisitorCount(socket.client.conn.server.clientsCount)
+    );
   });
 
   socket.on("sendNotification", ({ data, recieverName }) => {
@@ -66,5 +90,12 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     removeUser(socket.id);
+    setTimeout(() => {
+      onlineAdminUsers.forEach((e) => {
+        io.to(e.socketId).emit("disconnected", {
+          count: getVisitorCount(socket.client.conn.server.clientsCount),
+        });
+      });
+    }, 1000);
   });
 });

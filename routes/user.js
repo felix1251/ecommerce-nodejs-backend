@@ -53,7 +53,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
   try {
     const users = query
       ? await User.find().sort({ _id: -1 }).limit(5)
-      : await User.find();
+      : await User.find().select('-password');
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json(err);
