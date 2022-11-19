@@ -1,2 +1,4 @@
 # felmart_api
-api
+
+```
+npm run start
